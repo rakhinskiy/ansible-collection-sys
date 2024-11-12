@@ -1,0 +1,70 @@
+# code: language=ansible
+---
+
+# 00 # Always
+
+common_os:
+  code:
+    dist: "{{ ansible_distribution | local.sys.os_dist_code }}"
+    name: "{{ ansible_distribution | local.sys.os_name_code(ansible_lsb.codename | default(ansible_distribution_major_version)) }}"
+    version: "{{ ansible_lsb.codename | default(ansible_distribution_major_version) }}"
+  family: "{{ ansible_os_family | lower }}"
+  name: "{{ ansible_distribution | lower | replace('linux', '') }}"
+  version: "{{ ansible_distribution_major_version }}"
+  codename: "{{ ansible_lsb.codename | default() | lower }}"
+  pkg: "{{ ansible_pkg_mgr | lower }}"
+
+common_defaults:
+  always:
+    packages:
+      apt:
+        - "apt-transport-https"
+        - "ca-certificates"
+        - "gnupg2"
+        - "procps"
+        - "python3-apt"
+        - "python3-netaddr"
+        - "virt-what"
+      dnf:
+        - "dnf-utils"
+        - "procps-ng"
+        - "python3-libselinux"
+        - "python3-netaddr"
+        - "python3-policycoreutils"
+        - "virt-what"
+  hostname: ~
+  hosts:
+    system:
+      config: "/etc/hosts"
+    data:
+      - address: "127.0.0.1"
+        domains: 'localhost'
+      - address: '::1'
+        domains:
+          - 'ip6-localhost'
+          - 'ip6-loopback'
+      - address: ''
+        domains: ''
+      - address: 'fe00::0'
+        domains: 'ip6-localnet'
+      - address: 'ff00::0'
+        domains: 'ip6-mcastprefix'
+      - address: 'ff02::1'
+        domains: 'ip6-allnodes'
+      - address: 'ff02::2'
+        domains: 'ip6-allrouters'
+      - address: ''
+        domains: ''
+      - address: "127.0.0.1"
+        domains: "{{ inventory_hostname }}"
+      - address: ''
+        domains: ''
+  timezone: ~
+  repositories:
+    manager:
+      apt: ~
+      dnf: ~
+    add: ~
+    enable: ~
+    disable: ~
+  packages: ~

@@ -1,0 +1,16 @@
+[{{ item.name }}]
+name = {{ item.description }}
+{% if item.get('url') %}baseurl = {{ item.url }}
+{% endif -%}
+{% if item.get('mirror') %}mirrorlist = {{ item.mirror }}
+{% endif -%}
+{% if item.get('metalink') %}metalink = {{ item.meta }}
+{% endif -%}
+{% if item.get('gpg') %}
+gpgkey = {{ item.gpg | local.sys.to_list | join("\n         ") }}
+{% endif %}
+{% if item.options is defined %}
+{% for key, value in item.options.items() %}
+{{ key }} = {{ value }}
+{% endfor %}
+{% endif %}

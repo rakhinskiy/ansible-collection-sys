@@ -1,0 +1,1 @@
+{{ item.type | default('deb') }} {% if item.options is defined %}[{{ item.options.items() | map("join", "=") | join(" ") }}]{% endif %} {{ item.url }}

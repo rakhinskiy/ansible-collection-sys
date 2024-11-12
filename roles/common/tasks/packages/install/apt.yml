@@ -1,0 +1,14 @@
+# code: language=ansible
+---
+
+- name: "Common | Packages | Install | Apt"
+  ansible.builtin.apt:
+    name: "{{ _common_packages_ }}"
+    state: "{{ common.packages.state | default('present') }}"
+    update_cache: false
+    force_apt_get: true
+    cache_valid_time: 3600
+  become: true
+  tags:
+    - common
+    - common-packages

@@ -1,0 +1,31 @@
+# code: language=ansible
+---
+
+- name: "Common | Packages | Set facts"
+  ansible.builtin.set_fact:
+    _common_packages_: "{{ (
+    common.packages.all | default([]) +
+    common.packages[common_os.pkg] | default([]) +
+    common.packages[common_os.code.dist] | default([]) +
+    common.packages[common_os.code.name] | default([]) +
+    common.packages[ansible_virtualization_type] | default([])
+    ) | sort | unique }}"
+  tags:
+    - common
+    - common-packages
+
+- name: "Common | Packages | Debug"
+  ansible.builtin.debug:
+    var: _common_packages_
+    verbosity: 1
+  tags:
+    - common
+    - common-packages
+
+- name: "Common | Packages | Install"
+  ansible.builtin.include_tasks: "install/{{ common_os.pkg }}.yml"
+  when:
+    - _common_packages_ | default([]) is local.sys.list
+  tags:
+    - common
+    - common-packages

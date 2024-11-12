@@ -1,0 +1,3 @@
+{% for item in common.repositories.manager.apt | default([]) %}
+{{ item.option }} "{{ item.value }}";
+{% endfor %}

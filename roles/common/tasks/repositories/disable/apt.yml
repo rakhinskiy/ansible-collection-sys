@@ -1,0 +1,21 @@
+# code: language=ansible
+---
+
+- name: "Common | Repositories | Apt | Disable repository"
+  ansible.builtin.replace:
+    dest: "/etc/apt/sources.list.d/{{ item.file }}"
+    regexp: '^(\s*deb(-src)?(.*)$)'
+    replace: '# \1'
+  with_items: "{{ ansible_facts.repositories }}"
+  when:
+    - _common_repositories_disable_ is local.sys.list
+    - item.name is defined
+    - item.name in _common_repositories_disable
+    - item.state
+  notify:
+    - Update apt cache
+  become: true
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-disable

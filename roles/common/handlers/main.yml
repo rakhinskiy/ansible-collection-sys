@@ -1,0 +1,13 @@
+# code: language=ansible
+---
+
+- name: "Update apt cache"
+  ansible.builtin.apt:
+    update_cache: true
+    force_apt_get: true
+  become: true
+
+- name: "Update dnf cache"
+  ansible.builtin.dnf:
+    update_cache: true
+  become: true

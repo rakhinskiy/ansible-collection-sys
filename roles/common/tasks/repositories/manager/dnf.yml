@@ -1,0 +1,19 @@
+# code: language=ansible
+---
+
+- name: "Common | Repositories | Manager | Dnf / Yum"
+  community.general.ini_file:
+    path: "/etc/dnf/dnf.conf"
+    section: "main"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    no_extra_spaces: true
+    mode: '0644'
+  with_items: "{{ common.repositories.manager.dnf }}"
+  when:
+    - common.repositories.manager.dnf is local.sys.list_dicts
+  become: true
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-manager

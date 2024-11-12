@@ -1,0 +1,11 @@
+# code: language=ansible
+---
+
+galaxy_info:
+  author: Vyacheslav Rakhinskiy
+  description: "Common role"
+  license: MIT
+  min_ansible_version: '2.17'
+  galaxy_tags: []
+
+dependencies: []

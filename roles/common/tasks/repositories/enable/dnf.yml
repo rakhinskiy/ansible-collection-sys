@@ -1,0 +1,23 @@
+# code: language=ansible
+---
+
+- name: "Common | Repositories | Enable | Dnf / Yum"
+  community.general.ini_file:
+    path: "/etc/yum.repos.d/{{ item.file }}"
+    section: "{{ item.name }}"
+    option: "enabled"
+    value: "1"
+    mode: '0644'
+  with_items: "{{ ansible_facts.repositories }}"
+  when:
+    - _common_repositories_enable is local.sys.list
+    - item.name is defined
+    - item.name in _common_repositories_enable
+    - not item.state
+  notify:
+    - Update dnf cache
+  become: true
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-enable

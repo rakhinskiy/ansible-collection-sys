@@ -1,0 +1,86 @@
+# code: language=ansible
+---
+
+- name: "Common | Repositories | Manager"
+  ansible.builtin.include_tasks: "manager/{{ common_os.pkg }}.yml"
+  when:
+    - common.repositories.manager[common_os.pkg] | default([]) is local.sys.list_dicts
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-manager
+
+- name: "Common | Repositories | Add | Set facts"
+  ansible.builtin.set_fact:
+    _common_repositories_add_: "{{ [
+    common.repositories.add[common_os.pkg] | default([]),
+    common.repositories.add[common_os.code.dist] | default([]),
+    common.repositories.add[common_os.code.name] | default([]),
+    ] | community.general.lists_mergeby('name') }}"
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-add
+    - common-repositories-gpg
+
+- name: "Common | Repositories | Add"
+  ansible.builtin.include_tasks: "add/{{ common_os.pkg }}.yml"
+  when:
+    - _common_repositories_add_ | default([]) is local.sys.list_dicts
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-add
+    - common-repositories-gpg
+
+- name: "Common | Repositories | Enable | Set facts"
+  ansible.builtin.set_fact:
+    _common_repositories_enable_: "{{
+    common.repositories.enable[common_os.pkg] | default([]) +
+    common.repositories.enable[common_os.code.dist] | default([]) +
+    common.repositories.enable[common_os.code.name] | default([])
+    }}"
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-enable
+
+- name: "Common | Repositories | Enable"
+  ansible.builtin.include_tasks: "enable/{{ common_os.pkg }}.yml"
+  when:
+    - _common_repositories_enable_ is local.sys.list
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-enable
+
+- name: "Common | Repositories | Disable | Set facts"
+  ansible.builtin.set_fact:
+    _common_repositories_disable_: "{{
+    common.repositories.disable[common_os.pkg] | default([]) +
+    common.repositories.disable[common_os.code.dist] | default([]) +
+    common.repositories.disable[common_os.code.name] | default([])
+    }}"
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-disable
+
+- name: "Common | Repositories | Disable"
+  ansible.builtin.include_tasks: "disable/{{ common_os.pkg }}.yml"
+  when:
+    - _common_repositories_disable_ | default([]) is local.sys.list
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-disable
+
+- name: "Common | Repositories | Flush handlers"
+  ansible.builtin.meta: flush_handlers
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-add
+    - common-repositories-gpg
+    - common-repositories-enable
+    - common-repositories-disable

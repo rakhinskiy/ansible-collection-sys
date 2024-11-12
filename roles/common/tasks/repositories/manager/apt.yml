@@ -1,0 +1,18 @@
+# code: language=ansible
+---
+
+- name: "Common | Repositories | Manager | Apt"
+  ansible.builtin.template:
+    src: "repositories/apt.conf.j2"
+    dest: "/etc/apt/apt.conf.d/99custom"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    backup: false
+  when:
+    - common.repositories.manager.apt is local.sys.list_dicts
+  become: true
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-manager

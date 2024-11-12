@@ -1,0 +1,12 @@
+# code: language=ansible
+---
+
+- name: "Common | Packages | Install | Dnf"
+  ansible.builtin.dnf:
+    name: "{{ _common_packages_ }}"
+    state: "{{ common.packages.state | default('present') }}"
+    update_cache: false
+  become: true
+  tags:
+    - common
+    - common-packages

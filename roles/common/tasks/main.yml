@@ -1,0 +1,67 @@
+# code: language=ansible
+---
+
+- name: "Common"
+  when:
+    - roles.common | default(false)
+  block:
+    # 00 # Always
+    - name: "Common | Always"
+      ansible.builtin.include_tasks: "always/main.yml"
+      tags:
+        - always
+
+    # 01 # Hostname
+    - name: "Common | Hostname"
+      ansible.builtin.include_tasks: "hostname/main.yml"
+      when:
+        - common.hostname | default('') is local.sys.str
+      tags:
+        - common
+        - common-hostname
+
+    # 02 # Hosts
+    - name: "Common | Hosts"
+      ansible.builtin.include_tasks: "hosts/main.yml"
+      when:
+        - common.hosts.data | default([]) is local.sys.list
+        - common.hosts.data | length > common_defaults.hosts.data | length
+      tags:
+        - common
+        - common-hosts
+
+    # 03 # Timezone
+    - name: "Common | Timezone"
+      ansible.builtin.include_tasks: "timezone/main.yml"
+      when:
+        - common.timezone | default('') is local.sys.str
+      tags:
+        - common
+        - common-timezone
+
+    # 04 # Repositories
+    - name: "Common | Repositories"
+      ansible.builtin.include_tasks: "repositories/main.yml"
+      when:
+        - common.repositories | default({}) is local.sys.dict
+        - common.repositories.manager[common_os.pkg] | default([]) is local.sys.list_dicts or
+          common.repositories.enable | default([]) is local.sys.list or
+          common.repositories.disable | default([]) is local.sys.list
+      tags:
+        - common
+        - common-repositories
+        - common-repositories-manager
+        - common-repositories-add
+        - common-repositories-gpg
+        - common-repositories-enable
+        - common-repositories-disable
+
+    # 05 # Packages
+
+    - name: "Common | Packages"
+      ansible.builtin.include_tasks: "packages/main.yml"
+      when:
+        - common.packages is local.sys.dict
+      tags:
+        - common
+        - common-packages

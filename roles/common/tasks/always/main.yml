@@ -1,0 +1,94 @@
+# code: language=ansible
+---
+
+# Gathering facts
+
+- name: "Common | Always | Facts | OS"
+  ansible.builtin.setup:
+  tags:
+    - always
+
+- name: "Common | Always | Facts | Services"
+  ansible.builtin.service_facts:
+  tags:
+    - always
+
+- name: "Common | Always | Facts | Repositories"
+  local.sys.scan_repositories:
+  become: true
+  when:
+    - common_os.family in ["debian", "redhat"]
+  tags:
+    - always
+
+- name: "Common | Always | Facts | Repositories | Debug"
+  ansible.builtin.debug:
+    var: ansible_facts.repositories | default([])
+    verbosity: 1
+  tags:
+    - always
+
+# Check os name and version before run tasks
+
+- name: "Common | Always | Check os name"
+  ansible.builtin.fail:
+    msg: "Unsupported distribution {{ common_os.name }}"
+  when:
+    - common_os.name not in ["alma", "centos", "debian", "oracle", "redhat", "rocky", "ubuntu"]
+  tags:
+    - always
+
+- name: "Common | Always | Check alma/centos/oracle/redhat/rocky linux version"
+  ansible.builtin.fail:
+    msg: "Unsupported distribution version {{ common_os.name }}: {{ common_os.version }}"
+  when:
+    - common_os.name in ["alma", "centos", "oracle", "redhat", "rocky"]
+    - common_os.version not in ["8", "9"]
+  tags:
+    - always
+
+- name: "Common | Always | Check Debian / Ubuntu codename"
+  ansible.builtin.fail:
+    msg: "Unsupported distribution version {{ common_os.name }}: {{ common_os.codename }}"
+  when:
+    - common_os.name in ["debian", "ubuntu"]
+    - common_os.codename not in ["buster", "bullseye", "bookworm", "focal", "jammy", "noble"]
+  tags:
+    - always
+
+- name: "Common | Always | Merge config"
+  ansible.builtin.set_fact:
+    common: "{{ hostvars | local.sys.config_role(host=inventory_hostname, role='common', instances=False, defaults=common_defaults) }}"
+  tags:
+    - always
+
+- name: "Common | Always | Debug config common"
+  ansible.builtin.debug:
+    var: common
+    verbosity: 1
+  tags:
+    - always
+
+- name: "Common | Always | Install dependencies | Debian family"
+  ansible.builtin.apt:
+    name: "{{ common.always.packages.apt | default([]) }}"
+    state: present
+    update_cache: true
+    force_apt_get: true
+    cache_valid_time: 600
+  become: true
+  when:
+    - common_os.pkg == 'apt'
+  tags:
+    - always
+
+- name: "Common | Always | Install dependencies | Redhat family"
+  ansible.builtin.dnf:
+    name: "{{ common.always.packages.dnf | default([]) }}"
+    state: present
+    update_cache: true
+  become: true
+  when:
+    - common_os.pkg == 'dnf'
+  tags:
+    - always

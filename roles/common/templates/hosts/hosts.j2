@@ -1,0 +1,4 @@
+{% set justify = common.hosts.data | local.sys.justify_list('address') %}
+{% for item in common.hosts.data | default([]) %}
+{{ item.address.ljust(justify) }}    {{ item.domains | local.sys.to_list | join(' ') }}
+{% endfor %}

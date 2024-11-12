@@ -1,0 +1,50 @@
+# code: language=ansible
+---
+
+- name: "Common | Repositories | Add | Apt | GPG Keys [Keyserver]"
+  ansible.builtin.apt_key:
+    keyserver: "keyserver.ubuntu.com"
+    id: "{{ item }}"
+    state: present
+  with_items: "{{ _common_repositories_add_ | selectattr('gpg', 'defined') |  map(attribute='gpg') | list | unique }}"
+  when:
+    - _common_repositories_add_ is local.sys.list_dicts
+    - not item is url
+  become: true
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-gpg
+
+- name: "Common | Repositories | Add | Apt | GPG Keys [HTTP]"
+  ansible.builtin.apt_key:
+    url: "{{ item }}"
+    state: present
+  with_items: "{{ _common_repositories_add_ | selectattr('gpg', 'defined') |  map(attribute='gpg') | list | unique }}"
+  when:
+    - _common_repositories_add_ is local.sys.list_dicts
+    - item is url
+  become: true
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-gpg
+
+- name: "Common | Repositories | Apt | Add repository"
+  ansible.builtin.template:
+    src: "repositories/apt.list.j2"
+    dest: "/etc/apt/sources.list.d/{{ item.name }}.list"
+    owner: "root"
+    group: "root"
+    mode: "0644"
+    backup: false
+  with_items: "{{ _common_repositories_add_ }}"
+  when:
+    - _common_repositories_add_ is local.sys.list_dicts
+  notify:
+    - Update apt cache
+  become: true
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-add

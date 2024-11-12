@@ -1,0 +1,21 @@
+# code: language=ansible
+---
+
+- name: "Common | Repositories | Enable | Apt"
+  ansible.builtin.replace:
+    dest: "/etc/apt/sources.list.d/{{ item.file }}"
+    regexp: '^\s*#\s*(deb(-src)?(.*)$)'
+    replace: '\1'
+  with_items: "{{ ansible_facts.repositories }}"
+  when:
+    - _common_repositories_enable is local.sys.list
+    - item.name is defined
+    - item.name in _common_repositories_enable
+    - not item.state
+  notify:
+    - Update apt cache
+  become: true
+  tags:
+    - common
+    - common-repositories
+    - common-repositories-enable
