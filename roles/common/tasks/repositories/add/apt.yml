@@ -6,9 +6,8 @@
     keyserver: "keyserver.ubuntu.com"
     id: "{{ item }}"
     state: present
-  with_items: "{{ _common_repositories_add_ | selectattr('gpg', 'defined') |  map(attribute='gpg') | list | unique }}"
+  with_items: "{{ _common_repositories_add_ | local.sys.config_sub_keys(key='gpg', flatten=True) }}"
   when:
-    - _common_repositories_add_ is local.sys.list_dicts
     - not item is url
   become: true
   tags:
@@ -20,9 +19,8 @@
   ansible.builtin.apt_key:
     url: "{{ item }}"
     state: present
-  with_items: "{{ _common_repositories_add_ | selectattr('gpg', 'defined') |  map(attribute='gpg') | list | unique }}"
+  with_items: "{{ _common_repositories_add_ | local.sys.config_sub_keys(key='gpg', flatten=True) }}"
   when:
-    - _common_repositories_add_ is local.sys.list_dicts
     - item is url
   become: true
   tags:
@@ -33,14 +31,12 @@
 - name: "Common | Repositories | Apt | Add repository"
   ansible.builtin.template:
     src: "repositories/apt.list.j2"
-    dest: "/etc/apt/sources.list.d/{{ item.name }}.list"
+    dest: "/etc/apt/sources.list.d/{{ item.key }}.list"
     owner: "root"
     group: "root"
     mode: "0644"
     backup: false
-  with_items: "{{ _common_repositories_add_ }}"
-  when:
-    - _common_repositories_add_ is local.sys.list_dicts
+  with_dict: "{{ _common_repositories_add_ }}"
   notify:
     - Update apt cache
   become: true

@@ -12,11 +12,11 @@
 
 - name: "Common | Repositories | Add | Set facts"
   ansible.builtin.set_fact:
-    _common_repositories_add_: "{{ [
-    common.repositories.add[common_os.pkg] | default([]),
-    common.repositories.add[common_os.code.dist] | default([]),
-    common.repositories.add[common_os.code.name] | default([]),
-    ] | community.general.lists_mergeby('name') }}"
+    _common_repositories_add_: "{{ {} | local.sys.config_merge_dicts([
+      common.repositories.add[common_os.pkg] | default({}),
+      common.repositories.add[common_os.code.dist] | default({}),
+      common.repositories.add[common_os.code.name] | default({}),
+    ]) }}"
   tags:
     - common
     - common-repositories
@@ -26,7 +26,7 @@
 - name: "Common | Repositories | Add"
   ansible.builtin.include_tasks: "add/{{ common_os.pkg }}.yml"
   when:
-    - _common_repositories_add_ | default([]) is local.sys.list_dicts
+    - _common_repositories_add_ | default([]) is local.sys.dict
   tags:
     - common
     - common-repositories

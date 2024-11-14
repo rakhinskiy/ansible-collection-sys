@@ -1,0 +1,10 @@
+#jinja2: lstrip_blocks: True, trim_blocks: True
+{% for user, environment in common.environments.items() %}
+{%- if user == 'all' %}
+{%- for var, value in environment.items() %}
+{{ var }}="{{ value }}"
+{% endfor -%}
+{% endif -%}
+{% endfor %}
+
+test -e "${HOME}/.config/shell/env.sh" && source "${HOME}/.config/shell/env.sh"

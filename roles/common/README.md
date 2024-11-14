@@ -12,15 +12,19 @@ Requirements
 Tasks
 --------------
 
-| Number |     Task      |                Description                | Tests |
-|:------:|:-------------:|:-----------------------------------------:|:-----:|
-|   00   |    always     | Check OS and install ansible dependencies |  ---  |
-|   01   |   hostname    |            Set server hostname            |       |
-|   02   |     hosts     |             Manage /etc/hosts             |  ---  |
-|   03   |   timezone    |            Set server timezone            |       |
-|   04   | repositories  |    Add or enable/disable repositories     |       |
-|   05   |   packages    |             Install packages              |       |
-
+| Number |     Task     |                Description                | Tests |
+|:------:|:------------:|:-----------------------------------------:|:-----:|
+|   00   |    always    | Check OS and install ansible dependencies |  ---  |
+|   01   |   hostname   |            Set server hostname            |       |
+|   02   |    hosts     |             Manage /etc/hosts             |  ---  |
+|   03   |   timezone   |            Set server timezone            |       |
+|   04   | repositories |    Add or enable/disable repositories     |       |
+|   05   |   packages   |             Install packages              |       |
+|   06   |    locale    |             Configure locales             |       |
+|   07   |    users     |               Create users                |       |
+|   08   |     sudo     |           Configure sudo rules            |       |
+|   09   |     dirs     |              Create folders               |       |
+|   10   | environments |        Configure user environments        |       |
 
 Role Variables
 --------------
@@ -81,7 +85,8 @@ node:
 
     # 03 # Timezone
     # default: none
-    timezone: "Etc/UTC"
+    timezone:
+      name: "Etc/UTC"
 
     # 04 # Repositories
     repositories:
@@ -110,24 +115,27 @@ node:
       add:
         # Allowed keys | apt / dnf | al / co / ol / rh / rl / debian / ubuntu | al-8 / al-9 / ..
         apt:
-          - name: "zabbix"
-            url: "https://repo.zabbix.com/zabbix/6.4/ubuntu {{ os.codename }} main"
-            gpg: "https://repo.zabbix.com/RPM-GPG-KEY-ZABBIX-08EFA7DD"
-            # deb or deb-src | default deb | ignored on dnf / yum
-            type: "deb"
-            options:
-              arch: "amd64"
+          zabbix: # -> zabbix.list with multiple repos
+            - name: "zabbix"
+              url: "https://repo.zabbix.com/zabbix/6.4/ubuntu {{ os.codename }} main"
+              gpg: "https://repo.zabbix.com/RPM-GPG-KEY-ZABBIX-08EFA7DD"
+              # deb or deb-src | default deb | ignored on dnf / yum
+              type: "deb"
+              options:
+                arch: "amd64"
         dnf:
-          - name: "epel"
-            url: "https://download.fedoraproject.org/pub/epel/$releasever/$basearch/"
-            gpg: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ os.version }}"
-            options:
-              module_hotfixes: "1"
-              skip_if_unavailable: "true"
-          - name: "example"
-            url: "https://example.com/...."
-            options:
-              gpgcheck: "0"
+          epel: # -> epel.repo with multiple repos
+            - name: "epel"
+              url: "https://download.fedoraproject.org/pub/epel/$releasever/$basearch/"
+              gpg: "https://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-{{ os.version }}"
+              options:
+                module_hotfixes: "1"
+                skip_if_unavailable: "true"
+          example:
+            - name: "example"
+              url: "https://example.com/...."
+              options:
+                gpgcheck: "0"
       # default: none
       enable:
         al-9:
@@ -163,6 +171,67 @@ node:
         - "epel-release"
       kvm:
         - "qemu-guest-agent"
+
+    # 06 # Locale
+    locale:
+      # default: none
+      name: "en_US.UTF-8"
+
+    # 07 # Users
+    # default: none
+    users:
+      deploy:
+        shell: "/bin/bash"
+
+    # 08 # Sudo
+    # default: none
+    sudo:
+      system:
+        # default: "/etc/sudoers.d"
+        config: "/etc/sudoers.d"
+        # default: "sudo"
+        packages:
+          - "sudo"
+      # default: none
+      groups:
+        developers:
+      # default: none
+      users:
+        deploy:
+          defaults:
+            - "!requiretty"
+            - "env_keep += 'SSH_CLIENT'"
+            - "env_keep += 'SSH_CONNECTION'"
+            - "env_keep += 'SSH_TTY'"
+            - "env_keep += 'P9K_SSH'"
+            - "env_keep += 'TZ'"
+            - "secure_path = /sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin"
+          permissions:
+            - host: "ALL"
+              runas: "ALL"
+              no_passwd: true
+              cmd: "ALL"
+
+    # 09 # Dirs
+    # default: {}
+    dirs:
+      backup:
+        path: "/var/shared/backup"
+        state: "directory"
+        owner: "root"
+        group: "root"
+        mode: "700"
+        force: false
+        follow: "true"
+
+
+    # 10 # Environments
+    # default: {}
+    environments:
+      all:
+        SERVERS_GROUP: "production"
+      deploy:
+        SERVERS_DOMAIN: "example.com"
 
 ```
 

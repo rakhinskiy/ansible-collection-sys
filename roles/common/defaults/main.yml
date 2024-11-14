@@ -59,7 +59,8 @@ common_defaults:
         domains: "{{ inventory_hostname }}"
       - address: ''
         domains: ''
-  timezone: ~
+  timezone:
+    name: ~
   repositories:
     manager:
       apt: ~
@@ -68,3 +69,26 @@ common_defaults:
     enable: ~
     disable: ~
   packages: ~
+  locale:
+    system:
+      config:
+        apt: "/etc/default/locale"
+        dnf: "/etc/locale.conf"
+      packages:
+        apt:
+          - "locales"
+          - "locales-all"
+        dnf:
+          - "glibc-common"
+          - "glibc-all-langpacks"
+    name: ~
+  users: ~
+  sudo:
+    system:
+      config: "/etc/sudoers.d"
+      packages:
+        - "sudo"
+    groups: {}
+    users: {}
+  dirs: {}
+  environments: {}

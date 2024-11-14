@@ -1,0 +1,28 @@
+# code: language=ansible
+---
+
+- name: "Common | Users | Create groups"
+  ansible.builtin.group:
+    name: "{{ item.value.group | default(item.key) }}"
+    state: "present"
+  with_dict: "{{ common.users }}"
+  become: true
+  tags:
+    - common
+    - common-users
+
+- name: "Common | Users | Create users"
+  ansible.builtin.user:
+    name: "{{ item.key }}"
+    group: "{{ item.value.group | default(item.key) }}"
+    groups: "{{ item.value.groups | default('[]') }}"
+    shell: "{{ item.value.shell | default('/bin/bash') }}"
+    create_home: "{{ item.value.create_home | default('true') }}"
+    system: "{{ item.value.system | default('false') }}"
+    append: "{{ item.value.append | default('false') }}"
+    state: "{{ item.value.state | default('present') }}"
+  with_dict: "{{ common.users }}"
+  become: true
+  tags:
+    - common
+    - common-users

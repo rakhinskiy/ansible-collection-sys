@@ -1,0 +1,35 @@
+# code: language=ansible
+---
+
+- name: "Common | Sudo | Install"
+  ansible.builtin.include_tasks: "install/{{ common_os.pkg }}.yml"
+  tags:
+    - common
+    - common-sudo
+    - common-sudo-install
+
+- name: "Common | Sudo | Groups | Configure"
+  ansible.builtin.template:
+    src: "sudo/sudoers-group.j2"
+    dest: "{{ common.sudo.system.config }}/group-{{ item.key | replace('.', '-') }}"
+    mode: "0440"
+    validate: 'visudo -cf %s'
+  with_dict: "{{ common.sudo.groups | default({}) }}"
+  become: true
+  tags:
+    - common
+    - common-sudo
+    - common-sudo-configure
+
+- name: "Common | Sudo | Users | Configure"
+  ansible.builtin.template:
+    src: "sudo/sudoers-user.j2"
+    dest: "{{ common.sudo.system.config }}/user-{{ item.key | replace('.', '-') }}"
+    mode: "0440"
+    validate: 'visudo -cf %s'
+  with_dict: "{{ common.sudo.users | default({}) }}"
+  become: true
+  tags:
+    - common
+    - common-sudo
+    - common-sudo-configure

@@ -10,9 +10,9 @@
     mode: '0644'
   with_items: "{{ ansible_facts.repositories }}"
   when:
-    - _common_repositories_enable is local.sys.list
+    - _common_repositories_enable_ is local.sys.list
     - item.name is defined
-    - item.name in _common_repositories_enable
+    - item.name in _common_repositories_enable_
     - not item.state
   notify:
     - Update dnf cache

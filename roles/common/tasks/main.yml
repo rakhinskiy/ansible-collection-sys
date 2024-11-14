@@ -34,7 +34,7 @@
     - name: "Common | Timezone"
       ansible.builtin.include_tasks: "timezone/main.yml"
       when:
-        - common.timezone | default('') is local.sys.str
+        - common.timezone.name | default('') is local.sys.str
       tags:
         - common
         - common-timezone
@@ -57,7 +57,6 @@
         - common-repositories-disable
 
     # 05 # Packages
-
     - name: "Common | Packages"
       ansible.builtin.include_tasks: "packages/main.yml"
       when:
@@ -65,3 +64,51 @@
       tags:
         - common
         - common-packages
+
+    # 06 # Locale
+    - name: "Common | Locale"
+      ansible.builtin.include_tasks: "locale/main.yml"
+      when:
+        - common.locale.name | default('') is local.sys.str
+      tags:
+        - common
+        - common-locale
+
+    # 07 # Users
+    - name: "Common | Users"
+      ansible.builtin.include_tasks: "users/main.yml"
+      when:
+        - common.users is local.sys.dict
+      tags:
+        - common
+        - common-users
+
+    # 08 # Sudo
+    - name: "Common | Sudo"
+      ansible.builtin.include_tasks: "sudo/main.yml"
+      when:
+        - common.sudo.groups | default({}) is local.sys.dict or
+          common.sudo.users | default({}) is local.sys.dict
+      tags:
+        - common
+        - common-sudo
+        - common-sudo-install
+        - common-sudo-configure
+
+    # 09 # Dirs
+    - name: "Common | Dirs"
+      ansible.builtin.include_tasks: "dirs/main.yml"
+      when:
+        - common.dirs is local.sys.dict
+      tags:
+        - common
+        - common-dirs
+
+    # 10 # Environments
+    - name: "Common | Environments"
+      ansible.builtin.include_tasks: "environments/main.yml"
+      when:
+        - common.environments is local.sys.dict
+      tags:
+        - common
+        - common-environments

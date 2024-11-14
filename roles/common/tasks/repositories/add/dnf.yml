@@ -5,9 +5,8 @@
   ansible.builtin.rpm_key:
     key: "{{ item }}"
     state: present
-  with_items: "{{ _common_repositories_add_ | selectattr('gpg', 'defined') |  map(attribute='gpg') | list | unique }}"
+  with_items: "{{ _common_repositories_add_ | local.sys.config_sub_keys(key='gpg', flatten=True) }}"
   when:
-    - _common_repositories_add_ is local.sys.list_dicts
     - item is url
   become: true
   tags:
@@ -19,14 +18,12 @@
 - name: "Common | Repositories | Dnf / Yum | Add repository"
   ansible.builtin.template:
     src: "repositories/dnf.repo.j2"
-    dest: "/etc/yum.repos.d/{{ item.name }}.repo"
+    dest: "/etc/yum.repos.d/{{ item.key }}.repo"
     owner: "root"
     group: "root"
     mode: "0644"
     backup: false
-  with_items: "{{ _common_repositories_add_ }}"
-  when:
-    - _common_repositories_add_ is local.sys.list_dicts
+  with_dict: "{{ _common_repositories_add_ }}"
   notify:
     - Update dnf cache
   become: true

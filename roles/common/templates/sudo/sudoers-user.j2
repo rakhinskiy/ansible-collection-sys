@@ -1,0 +1,12 @@
+#jinja2: lstrip_blocks: True, trim_blocks: True
+{% if  item.value.permissions is defined %}
+    {% for permission in item.value.permissions | default([]) %}
+{{ item.key }} {{ permission.host | default('ALL') }}=({{ permission.runas | default('root') }}) {% if permission.no_passwd %}NOPASSWD:{% endif %} {{ permission.cmd | default('/bin/false') }}
+    {% endfor %}
+{% endif %}
+
+{% if item.value.defaults is defined %}
+    {% for default in item.value.defaults %}
+Defaults:{{ item.key }} {{ default }}
+    {% endfor %}
+{% endif %}

@@ -1,0 +1,17 @@
+# code: language=ansible
+---
+
+- name: "Common | Dirs | Create"
+  ansible.builtin.file:
+    path: "{{ item.value.path }}"
+    state: "{{ item.value.state | default('directory') }}"
+    owner: "{{ item.value.owner | default(omit) }}"
+    group: "{{ item.value.group | default(omit) }}"
+    mode: "{{ item.value.mode | default('755') }}"
+    force: "{{ item.value.force | default(false) }}"
+    follow: "{{ item.value.follow | default(true) }}"
+  become: true
+  with_dict: "{{ common.dirs }}"
+  tags:
+    - common
+    - common-dirs

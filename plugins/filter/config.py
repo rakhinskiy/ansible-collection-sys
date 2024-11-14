@@ -16,6 +16,8 @@ class FilterModule(object):
             "config_search_keys": self.config_search_keys,
             "config_check_key": self.config_check_key,
             "config_get_key": self.config_get_key,
+            "config_sub_keys": self.config_sub_keys,
+            "config_merge_dicts": self.config_merge_dicts,
         }
 
     def config_check_key(self, data: dict, key: str) -> bool:
@@ -168,5 +170,65 @@ class FilterModule(object):
                 continue
             if not check and self.config_get_key(data=data, key=get):
                 result.append(self.config_get_key(data=data, key=get))
+
+        return result
+
+    def config_sub_keys(
+        self, var: dict | list, key: str, flatten: bool = False
+    ) -> list:
+        result = []
+
+        if isinstance(var, dict):
+            for k, v in var.items():
+                if isinstance(v, dict):
+                    data = self.config_get_key(data=v, key=key, default=None)
+                    if data:
+                        if flatten and isinstance(data, list):
+                            result.extend(data)
+                        else:
+                            result.append(data)
+                if isinstance(v, list):
+                    for item in v:
+                        data = self.config_get_key(
+                            data=item, key=key, default=None
+                        )
+                        if data:
+                            if flatten and isinstance(data, list):
+                                result.extend(data)
+                            else:
+                                result.append(data)
+        if isinstance(var, list):
+            for item in var:
+                data = self.config_get_key(data=item, key=key, default=None)
+                if data:
+                    if flatten and isinstance(data, list):
+                        result.extend(data)
+                    else:
+                        result.append(data)
+
+        return sorted(list(set(result)))
+
+    @staticmethod
+    def config_merge_dicts(var: dict, data: dict | list[dict]) -> dict:
+
+        result = {}
+
+        merger = Merger(
+            type_strategies=[
+                (list, ["append_unique"]),
+                (dict, ["merge"]),
+                (set, ["union"]),
+            ],
+            fallback_strategies=["override"],
+            type_conflict_strategies=["override"],
+        )
+
+        if isinstance(data, dict):
+            result = merger.merge(var, data)
+
+        if isinstance(data, list):
+            result = var
+            for d in data:
+                result = merger.merge(result, d)
 
         return result

@@ -1,1 +1,3 @@
-{{ item.type | default('deb') }} {% if item.options is defined %}[{{ item.options.items() | map("join", "=") | join(" ") }}]{% endif %} {{ item.url }}
+{% for repo in item.value %}
+{{ repo.type | default('deb') }} {% if repo.options is defined %}[{{ repo.options.items() | map("join", "=") | join(" ") }}]{% endif %} {{ repo.url }}
+{% endfor %}

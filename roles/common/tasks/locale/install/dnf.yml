@@ -1,0 +1,12 @@
+# code: language=ansible
+---
+
+- name: "Common | Locale | Install | Dnf / Yum"
+  ansible.builtin.dnf:
+    name: "{{ common.locale.system.packages.dnf }}"
+    state: present
+    update_cache: false
+  become: true
+  tags:
+    - common
+    - common-locale

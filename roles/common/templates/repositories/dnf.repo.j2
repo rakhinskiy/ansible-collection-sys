@@ -1,16 +1,19 @@
-[{{ item.name }}]
-name = {{ item.description }}
-{% if item.get('url') %}baseurl = {{ item.url }}
+{% for repo in item.value %}
+[{{ repo.name }}]
+name = {{ repo.description }}
+{% if repo.get('url') %}baseurl = {{ repo.url }}
 {% endif -%}
-{% if item.get('mirror') %}mirrorlist = {{ item.mirror }}
+{% if repo.get('mirror') %}mirrorlist = {{ repo.mirror }}
 {% endif -%}
-{% if item.get('metalink') %}metalink = {{ item.meta }}
+{% if repo.get('meta') %}metalink = {{ repo.meta }}
 {% endif -%}
-{% if item.get('gpg') %}
-gpgkey = {{ item.gpg | local.sys.to_list | join("\n         ") }}
+{% if repo.get('gpg') %}
+gpgkey = {{ repo.gpg | local.sys.to_list | join("\n         ") }}
 {% endif %}
-{% if item.options is defined %}
-{% for key, value in item.options.items() %}
+{% if repo.options is defined %}
+{% for key, value in repo.options.items() %}
 {{ key }} = {{ value }}
 {% endfor %}
 {% endif %}
+
+{% endfor %}
